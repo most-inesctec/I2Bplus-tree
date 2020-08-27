@@ -31,7 +31,7 @@ const insertionTest = (dataset: Array<Interval<FlatInterval>>, alpha: number) =>
         iterator += 1;
     });
 
-    for (let order of getOrders())
+    for (const order of getOrders())
         suite = suite.add(`I_o${order}_a${alpha}#test`, () => {
             for (let int of insInts)
                 tree.insert(int);
@@ -41,6 +41,6 @@ const insertionTest = (dataset: Array<Interval<FlatInterval>>, alpha: number) =>
 };
 
 export const run = (dataset: Array<Interval<FlatInterval>>) => {
-    for (let alpha of getAlphas())
+    for (const alpha of getAlphas())
         insertionTest(dataset, alpha);
 };
