@@ -58,7 +58,7 @@ const rangeDeletionTest = (dataset: Array<Interval<FlatInterval>>, alpha: number
     let suite = createSuite(dataset, alpha);
 
     for (const order of getOrders())
-        suite = suite.add(`D_o${order}_a${alpha}#test`, () => {
+        suite = suite.add(`RD_o${order}_a${alpha}#test`, () => {
             for (let int of delInts)
                 tree.rangeDelete(int.getLowerBound(), int.getLowerBound());
         });
