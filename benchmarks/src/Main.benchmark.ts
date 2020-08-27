@@ -1,5 +1,5 @@
 import { readdirSync, readFileSync, existsSync, mkdirSync, writeFile, appendFileSync } from "fs";
-import { FlatInterval, Interval } from '../../src';
+import { IBplusTree, FlatInterval, Interval } from '../../src';
 import { getDatasetsDir, getOutputDir, getOutputPath } from './Settings'
 import { run as runTreeInsertion } from './TreeInsertion.benchmark'
 import { run as runInsertion } from './Insertion.benchmark'
@@ -22,32 +22,46 @@ const getIntervals = (filename: string): Array<Interval<FlatInterval>> => {
     return intervals;
 };
 
-// Although reading twice from memory takes more,
-// it is a better approach than saving all trees on memory
-const datasetNames: Array<string> =
-    readdirSync(datasetsDir)
-        .toString()
-        .split(",")
-        .filter((filename: string) => filename.includes(".csv"))
-        .sort((ds1: string, ds2: string) => getIntervals(ds1).length - getIntervals(ds2).length);
+const main = () => {
 
-// Making sure output file exists
-if (!existsSync(getOutputDir()))
-    mkdirSync(getOutputDir());
-writeFile(getOutputPath(), '',
-    err => console.log(err ? err : "The file was saved!")
-);
+    // Although reading twice from memory takes more,
+    // it is a better approach than saving all trees on memory
+    const datasetNames: Array<string> =
+        readdirSync(datasetsDir)
+            .toString()
+            .split(",")
+            .filter((filename: string) => filename.includes(".csv"))
+            .sort((ds1: string, ds2: string) => getIntervals(ds1).length - getIntervals(ds2).length);
 
-// Performing benchmarking tests on all datasets
-for (let name of datasetNames) {
-    const dataset: Array<Interval<FlatInterval>> =
-        getIntervals(name);
+    // Making sure output file exists
+    if (!existsSync(getOutputDir()))
+        mkdirSync(getOutputDir());
 
-    console.log(`::: Dataset ${name} with ${dataset.length} intervals :::`);
-    appendFileSync(getOutputPath(), `${dataset.length}\n`);
+    writeFile(getOutputPath(), '',
+        err => console.log(err ? err : "The file was saved!")
+    );
 
-    runTreeInsertion(dataset);
-    runInsertion(dataset);
-    runDeletion(dataset);
-    runSearch(dataset);
+    // Warming up, so necessary classes for test are loaded to the closure
+    // by inserting the smallest dataset in the tree
+    if (datasetNames.length >= 1) {
+        const temp: IBplusTree<FlatInterval> = new IBplusTree(10, 0.2);
+        for (const obj of getIntervals(datasetNames[0]))
+            temp.insert(obj)
+    }
+
+    // Performing benchmarking tests on all datasets
+    for (const name of datasetNames) {
+        const dataset: Array<Interval<FlatInterval>> =
+            getIntervals(name);
+
+        console.log(`::: Dataset ${name} with ${dataset.length} intervals :::`);
+        appendFileSync(getOutputPath(), `${dataset.length}\n`);
+
+        //runTreeInsertion(dataset);
+        runInsertion(dataset);
+        runDeletion(dataset);
+        runSearch(dataset);
+    }
 }
+
+main();
