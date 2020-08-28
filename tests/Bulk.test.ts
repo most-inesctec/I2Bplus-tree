@@ -22,7 +22,7 @@ describe('Bulk testing', () => {
 
         expect(tree.allRangeSearch(-1, 300).size).to.equal(2000);
         for (const int of Array.from(tree.allRangeSearch(30, 80)))
-            expect(int.intersect(new FlatInterval(20, 80)));
+            expect(int.intersect(new FlatInterval(30, 80)));
     });
 
     it('Bulk Insertion and RangeSearch with TimeSplits', () => {
@@ -32,7 +32,7 @@ describe('Bulk testing', () => {
 
         expect(tree.allRangeSearch(-1, 1000).size).to.equal(2000);
         for (const int of Array.from(tree.allRangeSearch(30, 80)))
-            expect(int.intersect(new FlatInterval(20, 80)));
+            expect(int.intersect(new FlatInterval(30, 80)));
     });
 
     it('Bulk Range Removal', () => {
@@ -40,11 +40,15 @@ describe('Bulk testing', () => {
         for (const entry of dataset)
             tree.insert(entry);
 
+        const deletedIntervals = tree.containedRangeSearch(50, 150);
         tree.rangeDelete(50, 150);
         expect(tree.containedRangeSearch(50, 150).size).to.equal(0);
 
+        for (let int of Array.from(deletedIntervals))
+            tree.insert(int);
+        expect(tree.containedRangeSearch(50, 150).size).to.equal(deletedIntervals.size);
+
         tree.rangeDelete(-1, 300);
-        console.log(Array.from(tree.allRangeSearch(-1, 300)))
         expect(tree.allRangeSearch(-1, 300).size).to.equal(0);
     });
 
@@ -53,10 +57,15 @@ describe('Bulk testing', () => {
             const tree: IBplusTree<FlatInterval> = new IBplusTree<FlatInterval>(10, 0.2);
             for (const entry of dataset)
                 tree.insert(entry);
-    
+
+            const deletedIntervals = tree.containedRangeSearch(50, 150);
             tree.rangeDelete(50, 150);
             expect(tree.containedRangeSearch(50, 150).size).to.equal(0);
-    
+
+            for (let int of Array.from(deletedIntervals))
+                tree.insert(int);
+            expect(tree.containedRangeSearch(50, 150).size).to.equal(deletedIntervals.size);
+
             tree.rangeDelete(-1, 300);
             expect(tree.allRangeSearch(-1, 300).size).to.equal(0);
         });
