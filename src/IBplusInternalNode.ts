@@ -32,7 +32,7 @@ export class IBplusInternalNode<T extends FlatInterval> extends IBplusNode<T> {
 
         this.maximums[this.children.indexOf(node)] = newMax;
 
-        if (newMax > prevMax && !this.isRoot())
+        if (!this.isRoot() && (newMax > prevMax || this.getMax() != prevMax))
             this.parent.updateMax(this);
     }
 
@@ -44,10 +44,11 @@ export class IBplusInternalNode<T extends FlatInterval> extends IBplusNode<T> {
     updateMin(node: IBplusNode<T>): void {
         let newMin: number = node.getMinKey();
         let prevMin: number = this.getMinKey();
+        let index: number = this.children.indexOf(node);
 
-        this.keys[this.children.indexOf(node)] = newMin;
+        this.keys[index] = newMin;
 
-        if (newMin < prevMin && !this.isRoot())
+        if (!this.isRoot() && (newMin < prevMin || index == 0))
             this.parent.updateMin(this);
     }
 
@@ -126,7 +127,7 @@ export class IBplusInternalNode<T extends FlatInterval> extends IBplusNode<T> {
     }
 
     /**
-     * When a split ocurred in a child of this node, the node structures must be updated.
+     * When a split occurred in a child of this node, the node structures must be updated.
      * Updates maximum and key of previous node and adds the newly created node to this node children.
      * 
      * @param original The node that was split
@@ -241,12 +242,20 @@ export class IBplusInternalNode<T extends FlatInterval> extends IBplusNode<T> {
             let childIdx: number = leaf.getChildren().indexOf(int);
             if (childIdx < 0)
                 // Previous removals triggered borrows that moved the child
-                if (leaf.getLeftSibling() && int.getLowerBound() <= leaf.getMinKey())
+                if (leaf.getLeftSibling() && int.getLowerBound() <= leaf.getMinKey()) {
+                    //INVARIANT
+                    if ((<IBplusLeafNode<T>>leaf.getLeftSibling()).getSubstituteSibling() != null)
+                        console.log("BIG GG LEFT SIBLING");
                     // Sent to left sibling leaf
                     leaf = <IBplusLeafNode<T>>leaf.getLeftSibling();
-                else if (leaf.getRightSibling() && int.getLowerBound() > leaf.getMinKey())
+                }
+                else if (leaf.getRightSibling() && int.getLowerBound() > leaf.getMinKey()) {
+                    //INVARIANT
+                    if ((<IBplusLeafNode<T>>leaf.getRightSibling()).getSubstituteSibling() != null)
+                        console.log("BIG GG RIGHT SIBLING");
                     // Sent to right sibling leaf
                     leaf = <IBplusLeafNode<T>>leaf.getRightSibling();
+                }
                 else
                     throw Error('Unable to find child in range remove.');
 
