@@ -187,6 +187,10 @@ export abstract class IBplusNode<T extends FlatInterval> {
      * @param alpha the value of alpha used in the PickSplitPoint algorithm. If alpha <= 0, time splits aren't used.
     */
     insert(int: Interval<T>, alpha: number): void {
+        // Insertions must always start in the root -> Valid since this function is not recursive
+        if (!this.isRoot())
+            return this.parent.insert(int, alpha);
+
         // Perform a search to determine what leaf the new record should go into.
         let insertionNode: IBplusLeafNode<T> = this.findInsertNode(int);
 
@@ -198,6 +202,7 @@ export abstract class IBplusNode<T extends FlatInterval> {
 
         // If we are adding and the keys's size is already equal to order, split before insertion
         if (insertionNode.keys.length >= this.order)
+            // Split also inserts
             insertionNode = insertionNode.split(int);
         else
             insertionNode.addInterval(int);

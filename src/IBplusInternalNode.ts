@@ -32,7 +32,7 @@ export class IBplusInternalNode<T extends FlatInterval> extends IBplusNode<T> {
 
         this.maximums[this.children.indexOf(node)] = newMax;
 
-        if (newMax > prevMax && !this.isRoot())
+        if (!this.isRoot() && (newMax > prevMax || this.getMax() != prevMax))
             this.parent.updateMax(this);
     }
 
@@ -44,10 +44,11 @@ export class IBplusInternalNode<T extends FlatInterval> extends IBplusNode<T> {
     updateMin(node: IBplusNode<T>): void {
         let newMin: number = node.getMinKey();
         let prevMin: number = this.getMinKey();
+        let index: number = this.children.indexOf(node);
 
-        this.keys[this.children.indexOf(node)] = newMin;
+        this.keys[index] = newMin;
 
-        if (newMin < prevMin && !this.isRoot())
+        if (!this.isRoot() && (newMin < prevMin || index == 0))
             this.parent.updateMin(this);
     }
 
@@ -126,7 +127,7 @@ export class IBplusInternalNode<T extends FlatInterval> extends IBplusNode<T> {
     }
 
     /**
-     * When a split ocurred in a child of this node, the node structures must be updated.
+     * When a split occurred in a child of this node, the node structures must be updated.
      * Updates maximum and key of previous node and adds the newly created node to this node children.
      * 
      * @param original The node that was split

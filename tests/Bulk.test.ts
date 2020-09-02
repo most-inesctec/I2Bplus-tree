@@ -15,6 +15,16 @@ describe('Bulk testing', () => {
                 new FlatInterval(parseInt(vals[0]), parseInt(vals[1]))
             );
 
+    it('Tree traversing', () => {
+        const tree: IBplusTree<FlatInterval> = new IBplusTree<FlatInterval>(10, 0);
+        for (const entry of dataset)
+            tree.insert(entry);
+        let rsResult = Array.from(tree.allRangeSearch(-1, 300));
+
+        for (let i = 1; i < rsResult.length; i++)
+            expect(rsResult[i - 1].getLowerBound() <= rsResult[i].getLowerBound()).to.be.true;
+    });
+
     it('Bulk Insertion and RangeSearch', () => {
         const tree: IBplusTree<FlatInterval> = new IBplusTree<FlatInterval>(10, 0);
         for (const entry of dataset)
