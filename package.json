@@ -1,7 +1,7 @@
 {
   "name": "ibplustree",
   "version": "1.0.0",
-  "description": "A package to implement the Interval B+ tree, in TypeScript",
+  "description": "A package to implement the Improved Interval B+ tree, in TypeScript",
   "main": "src/index.ts",
   "directories": {
     "src": "src",
@@ -30,7 +30,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/EdgarACarneiro/IBplusTree.git"
+    "url": "git+https://github.com/most-inesctec/I2BplusTree.git"
   },
   "keywords": [
     "temporal data",
@@ -47,7 +47,7 @@
   "author": "EdgarACarneiro",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/EdgarACarneiro/IBplusTree/issues"
+    "url": "https://github.com/most-inesctec/I2BplusTree/issues"
   },
-  "homepage": "https://github.com/EdgarACarneiro/IBplusTree#readme"
+  "homepage": "https://github.com/most-inesctec/I2BplusTree#readme"
 }
