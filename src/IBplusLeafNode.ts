@@ -35,39 +35,6 @@ export class IBplusLeafNode<T extends FlatInterval> extends IBplusNode<T> {
         return this.substSibling;
     }
 
-    // getRightSibling(): IBplusNode<T> {
-    //     let t = <IBplusLeafNode<T>>this.rightSibling;
-    //     //INVARIANT
-    //     if (t && t.leftSibling != this)
-    //         console.log("ETA GG GET RIGHT SIBLING")
-
-    //     if (t instanceof IBplusLeafNode) {
-    //         let rightSibling = <IBplusLeafNode<T>>t;
-
-    //         if (rightSibling != null && rightSibling.getSubstituteSibling() != null)
-    //             console.log("HERE IS the MIGHTY FUCK UP");
-    //     }
-    //     return t;
-    // }
-
-    // /**
-    //  * Gets this node left sibling.
-    //  */
-    // getLeftSibling(): IBplusNode<T> {
-    //     let t = <IBplusLeafNode<T>> this.leftSibling;
-    //     //INVARIANT
-    //     if (t && t.rightSibling != this)
-    //         console.log("ETA GG GET LEFT SIBLING")
-
-    //     if (t instanceof IBplusLeafNode) {
-    //         let leftSibling = <IBplusLeafNode<T>>t;
-
-    //         if (leftSibling != null && leftSibling.getSubstituteSibling() != null)
-    //             console.log("HERE IS the MIGHTY FUCK UP");
-    //     }
-    //     return t;
-    // }
-
     exists(int: T): boolean {
         for (const child of this.children)
             if (child.getOriginalInterval().equals(int))
@@ -135,26 +102,6 @@ export class IBplusLeafNode<T extends FlatInterval> extends IBplusNode<T> {
         this.keys.splice(i, 0, int.getLowerBound());
         this.maximums.splice(i, 0, int.getUpperBound());
         this.children.splice(i, 0, int);
-
-
-        let ls = null, rs = null;
-        let lS = this.getLeftSibling(), rS = this.getRightSibling();
-        if (i == 0) {
-            ls = lS ? lS.keys[lS.keys.length - 1] : null;
-            rs = this.keys[1];
-        }
-        else if (i == this.keys.length - 1) {
-            ls = this.keys[this.keys.length - 2];
-            rs = rS ? rS.keys[0] : null;
-        }
-        else {
-            ls = this.keys[i - 1]
-            rs = this.keys[i + 1]
-        }
-
-        if ((ls && ls > int.getLowerBound()) || (rs && rs < int.getLowerBound())) {
-            console.log("INSERTION fUCKEd UP HOMMIE")
-        }
     }
 
     split(int: Interval<T>): IBplusLeafNode<T> {
@@ -207,26 +154,6 @@ export class IBplusLeafNode<T extends FlatInterval> extends IBplusNode<T> {
     protected setChildParentOnBorrow(newChild: Interval<T>, insertId: number): void {
         // Child is Interval, it does not store parent information
         this.children.splice(insertId, 0, newChild);
-
-        let i = insertId;
-        let ls = null, rs = null;
-        let lS = this.getLeftSibling(), rS = this.getRightSibling();
-        if (i == 0) {
-            ls = lS ? lS.keys[lS.keys.length - 1] : null;
-            rs = this.keys[1];
-        }
-        else if (i == this.keys.length - 1) {
-            ls = this.keys[this.keys.length - 2];
-            rs = rS ? rS.keys[0] : null;
-        }
-        else {
-            ls = this.keys[i - 1]
-            rs = this.keys[i + 1]
-        }
-
-        if ((ls && ls > newChild.getLowerBound()) || (rs && rs < newChild.getLowerBound())) {
-            console.log("BORROW fUCKEd UP HOMMIE")
-        }
     }
 
     protected setChildrenParentOnMerge(newParent: IBplusNode<T>): void {

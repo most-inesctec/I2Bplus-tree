@@ -242,20 +242,12 @@ export class IBplusInternalNode<T extends FlatInterval> extends IBplusNode<T> {
             let childIdx: number = leaf.getChildren().indexOf(int);
             if (childIdx < 0)
                 // Previous removals triggered borrows that moved the child
-                if (leaf.getLeftSibling() && int.getLowerBound() <= leaf.getMinKey()) {
-                    //INVARIANT
-                    if ((<IBplusLeafNode<T>>leaf.getLeftSibling()).getSubstituteSibling() != null)
-                        console.log("BIG GG LEFT SIBLING");
+                if (leaf.getLeftSibling() && int.getLowerBound() <= leaf.getMinKey())
                     // Sent to left sibling leaf
                     leaf = <IBplusLeafNode<T>>leaf.getLeftSibling();
-                }
-                else if (leaf.getRightSibling() && int.getLowerBound() > leaf.getMinKey()) {
-                    //INVARIANT
-                    if ((<IBplusLeafNode<T>>leaf.getRightSibling()).getSubstituteSibling() != null)
-                        console.log("BIG GG RIGHT SIBLING");
+                else if (leaf.getRightSibling() && int.getLowerBound() > leaf.getMinKey())
                     // Sent to right sibling leaf
                     leaf = <IBplusLeafNode<T>>leaf.getRightSibling();
-                }
                 else
                     throw Error('Unable to find child in range remove.');
 

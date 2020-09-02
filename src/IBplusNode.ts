@@ -10,9 +10,9 @@ import {
  */
 export abstract class IBplusNode<T extends FlatInterval> {
 
-    protected rightSibling: IBplusNode<T> = null;
+    private rightSibling: IBplusNode<T> = null;
 
-    protected leftSibling: IBplusNode<T> = null;
+    private leftSibling: IBplusNode<T> = null;
 
     /**
      * @param order Node's order. Must be the same in all tree nodes.
@@ -22,7 +22,7 @@ export abstract class IBplusNode<T extends FlatInterval> {
      */
     constructor(public readonly order: number,
         protected parent: IBplusInternalNode<T>,
-        public keys: Array<number>,
+        protected keys: Array<number>,
         protected maximums: Array<number>) { }
 
     /**
@@ -66,18 +66,7 @@ export abstract class IBplusNode<T extends FlatInterval> {
      * Gets this node right sibling.
      */
     getRightSibling(): IBplusNode<T> {
-        let t = this.rightSibling;
-        //INVARIANT
-        if (t && t.leftSibling != this)
-            console.log("ETA GG GET RIGHT SIBLING")
-
-        if (t instanceof IBplusLeafNode) {
-            let rightSibling = <IBplusLeafNode<T>>t;
-
-            if (rightSibling != null && rightSibling.getSubstituteSibling() != null)
-                console.log("HERE IS the MIGHTY FUCK UP");
-        }
-        return t;
+        return this.rightSibling;
     }
 
     /**
@@ -93,18 +82,7 @@ export abstract class IBplusNode<T extends FlatInterval> {
      * Gets this node left sibling.
      */
     getLeftSibling(): IBplusNode<T> {
-        let t = this.leftSibling;
-        //INVARIANT
-        if (t && t.rightSibling != this)
-            console.log("ETA GG GET LEFT SIBLING")
-
-        if (t instanceof IBplusLeafNode) {
-            let leftSibling = <IBplusLeafNode<T>>t;
-
-            if (leftSibling != null && leftSibling.getSubstituteSibling() != null)
-                console.log("HERE IS the MIGHTY FUCK UP");
-        }
-        return t;
+        return this.leftSibling;
     }
 
     /**
@@ -280,21 +258,6 @@ export abstract class IBplusNode<T extends FlatInterval> {
 
         this.setChildParentOnBorrow(sibling.getChildren().splice(removeId, 1)[0], insertId);
 
-        //INVARIANT
-        let rs = this.getRightSibling();
-        if (rs && rs.keys[0] < this.keys[this.keys.length - 1]) {
-            console.log("PQP")
-        }
-
-        let lf = this.getLeftSibling();
-        if (lf && lf.keys[lf.keys.length - 1] > this.keys[0]) {
-            console.log("PQP")
-        }
-
-        if (lf !== sibling && rs !== sibling) {
-            console.log("WHAT IS THIS SIBLING");
-        }
-
         this.updateParentValues();
         sibling.updateParentValues();
     }
@@ -332,17 +295,6 @@ export abstract class IBplusNode<T extends FlatInterval> {
         this.concatSiblings();
         this.parent.removeChild(this.parent.getChildren().indexOf(this));
 
-        //INVARIANT
-        let test = sibling.getRightSibling();
-        if (test && test.keys[0] < sibling.keys[sibling.keys.length - 1]) {
-            console.log("PQP")
-        }
-
-        test = sibling.getLeftSibling();
-        if (test && test.keys[test.keys.length - 1] > sibling.keys[0]) {
-            console.log("PQP")
-        }
-
         if (!sibling.isRoot())
             sibling.updateParentValues();
     }
@@ -355,36 +307,20 @@ export abstract class IBplusNode<T extends FlatInterval> {
         let minEntries: number = Math.floor(this.order / 2);
 
         // Borrow from left sibling
-        if (this.leftSibling != null && this.leftSibling.keys.length > minEntries) {
-            //INVARIANT
-            if (this.leftSibling.keys[this.leftSibling.keys.length - 1] > this.keys[0])
-                console.log("FUCKED LEFT BORROWING")
+        if (this.leftSibling != null && this.leftSibling.keys.length > minEntries)
             this.borrow(this.leftSibling, 0, this.leftSibling.keys.length - 1);
-        }
 
         //Borrow from right sibling
-        else if (this.rightSibling != null && this.rightSibling.keys.length > minEntries) {
-            //INVARIANT
-            if (this.rightSibling.keys[0] < this.keys[this.keys.length - 1])
-                console.log("FUCKED RIGHT BORROWING")
+        else if (this.rightSibling != null && this.rightSibling.keys.length > minEntries)
             this.borrow(this.rightSibling, this.keys.length, 0);
-        }
 
         // Merge left sibling
-        else if (this.leftSibling != null) {
-            //INVARIANT
-            if (this.leftSibling.keys[this.leftSibling.keys.length - 1] > this.keys[0])
-                console.log("FUCKED LEFT BORROWING")
+        else if (this.leftSibling != null)
             this.merge(this.leftSibling, this.leftSibling.keys.length);
-        }
 
         // Merge right sibling
-        else if (this.rightSibling != null) {
-            //INVARIANT
-            if (this.rightSibling.keys[0] < this.keys[this.keys.length - 1])
-                console.log("FUCKED RIGHT BORROWING")
+        else if (this.rightSibling != null)
             this.merge(this.rightSibling, 0);
-        }
     }
 
     /**
