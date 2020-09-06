@@ -14,6 +14,7 @@ const getIntervals = (filename: string): Array<Interval<FlatInterval>> => {
         readFileSync(`${datasetsDir}/${filename}`)
             .toString()
             .split("\n")
+            .filter((line: string) => line.length > 0)
             .map((line: string) => line.split(" "))
             .map((vals: string[]) =>
                 new FlatInterval(parseInt(vals[0]), parseInt(vals[1]))
@@ -57,7 +58,7 @@ const main = () => {
         console.log(`::: Dataset ${name} with ${dataset.length} intervals :::`);
         appendFileSync(getOutputPath(), `${dataset.length}\n`);
 
-        //runTreeInsertion(dataset);
+        runTreeInsertion(dataset);
         runInsertion(dataset);
         runDeletion(dataset);
         runSearch(dataset);
