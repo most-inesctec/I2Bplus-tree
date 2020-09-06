@@ -115,6 +115,39 @@ def create_plot(title: str, xlabel: str, ylabel: str, domain: list, *data):
     df = pd.DataFrame(agg_data)
 
     plt.clf()
+
+    # # Hardcoded to print ratios
+    # col_name = df.columns[1]
+    # if col_name[0:5] == "I2B_T" or col_name[0:6] == "I2B_DH":
+    #     new_title = "Ratio " + title
+    #     sns.set_palette(["#0D4F91", "#187F0D"])
+
+    #     n = "Ratio " + col_name[4:]
+    #     df[n] = df.iloc[:, 1] / df.iloc[:, 2]
+    #     plt.plot(df['x'], df[n], marker='.',
+    #              linewidth=1, alpha=1, label=n)
+    #     df = df.drop(n, axis=1)
+
+    #     n = "Ratio " + df.columns[3][4:]
+    #     df[n] = df.iloc[:, 3] / df.iloc[:, 4]
+    #     plt.plot(df['x'], df[n], marker='.',
+    #              linewidth=1, alpha=1, label=n)
+    #     df = df.drop([n], axis=1)
+
+    #     plt.axhline(y=1, linewidth=1, color='r')
+    #     plt.legend(loc=4, ncol=2)
+    #     plt.title(new_title, loc='left',
+    #               fontsize=12, fontweight=0, color='black')
+    #     plt.xlabel(xlabel)
+    #     plt.ylabel(ylabel)
+    #     # plt.gca().set_ylim(bottom=0)
+
+    #     if not os.path.exists(SAVING_DIR):
+    #         os.makedirs(SAVING_DIR)
+
+    #     plt.savefig(SAVING_DIR + '/' + new_title + '.png')
+    #     plt.clf()
+
     # sns.set_palette("RdYlBu", len(data))
     sns.set_palette(["#0D4F91", "#8EAFC9", "#187F0D", "#91C763"])
 
