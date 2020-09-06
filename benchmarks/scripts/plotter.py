@@ -6,18 +6,48 @@ import numpy as np
 import pandas as pd
 import os
 
+'''Script to plot the benchmarks data'''
 
-ap = argparse.ArgumentParser()
-ap.add_argument('-i', '--input', type=str,
-                default='../results/logs.csv', help='Input file containing the logs')
-ap.add_argument('-o', '--output', type=str,
-                default='../plots', help='Output directory for the plots')
+SAVING_DIR = ''
 
-args = vars(ap.parse_args())
 
-SAVING_DIR = args['output']
+def parse_args():
+    '''Parse the command line arguments'''
+    ap = argparse.ArgumentParser(description='Plot the benchmarks data')
 
-sns.set()
+    ap.add_argument('-i', '--input', type=str,
+                    default='../results/logs.csv', help='Input file containing the logs')
+    ap.add_argument('-o', '--output', type=str,
+                    default='../plots', help='Output directory for the plots')
+    ap.add_argument('-tt', '--test_types', nargs='+',
+                    default=['I', 'T', 'E', 'RS', 'CRS', 'D', 'RD', 'DH'])
+    ap.add_argument('-tg', '--test_groups', nargs='+',
+                    default=[])
+    # Check if alpha tests are run
+    ap.add_argument('--at', dest='at', action='store_true',
+                    help='Flag indicating that the alpha tests run')
+    ap.add_argument('--no-at', dest='at', action='store_false',
+                    help='Flag indicating that the alpha tests do not run')
+    ap.set_defaults(at=True)
+    # Check if order tests are run
+    ap.add_argument('--ot', dest='ot', action='store_true',
+                    help='Flag indicating that the order tests run')
+    ap.add_argument('--no-ot', dest='ot', action='store_false',
+                    help='Flag indicating that the order tests do not run')
+    ap.set_defaults(ot=True)
+    # Check if the big-O alpha tests run
+    ap.add_argument('--bat', dest='bat', action='store_true',
+                    help='Flag indicating that the big-O alpha tests run')
+    ap.add_argument('--no-bat', dest='bat', action='store_false',
+                    help='Flag indicating that the big-O alpha tests do not run')
+    ap.set_defaults(bat=True)
+    # Check if the big-O alpha tests run
+    ap.add_argument('--bot', dest='bot', action='store_true',
+                    help='Flag indicating that the big-O order tests run')
+    ap.add_argument('--no-bot', dest='bot', action='store_false',
+                    help='Flag indicating that the big-O order tests do not run')
+    ap.set_defaults(bot=True)
+    return ap.parse_args()
 
 
 def print_datasets(datasets: dict) -> None:
@@ -85,12 +115,17 @@ def create_plot(title: str, xlabel: str, ylabel: str, domain: list, *data):
     df = pd.DataFrame(agg_data)
 
     plt.clf()
-    sns.set_palette("RdYlBu", len(data))
+    # sns.set_palette("RdYlBu", len(data))
+    sns.set_palette(["#0D4F91", "#8EAFC9", "#187F0D", "#91C763"])
 
     # multiple line plot
     for column in df.drop('x', axis=1):
-        plt.plot(df['x'], df[column], marker='.',
-                 linewidth=1, alpha=1, label=column)
+        if str(column[0:2]) == "I2":
+            plt.plot(df['x'], df[column], marker='.',
+                     linewidth=1, alpha=1, label=column)
+        else:
+            plt.plot(df['x'], df[column], marker='p',
+                     linewidth=1, alpha=1, label=column)
 
     plt.legend(loc=4, ncol=2)
     plt.title(title, loc='left',
@@ -111,6 +146,7 @@ def create_plot_parameter(title: str,
                           name: str,
                           parameter_domain: list,
                           dataset: dict,
+                          test_groups: [str],
                           ext_all=False):
     """Creates all possible functions according to a given
     parameter and the plot domain. Then it calls the create_plot
@@ -118,95 +154,128 @@ def create_plot_parameter(title: str,
     functions = []
     var_domain = None
 
-    for val in parameter_domain:
-        # for ds_type in ["BI_", "SI_"]:  # For testing different type of datasets
-        regex = regexes[0] + val + regexes[1]  # Add ds_type
+    if len(test_groups) > 0:
+        for val in parameter_domain:
+            for group in test_groups:  # For testing different type of datasets
+                regex = group + regexes[0] + val + regexes[1]
 
-        # 1st iteration
-        if var_domain == None:
-            var_domain = extract_all(regex, dataset)[0]\
-                if ext_all else extract(regex, dataset)[0]
+                # 1st iteration
+                if var_domain == None:
+                    var_domain = extract_all(regex, dataset)[0]\
+                        if ext_all else extract(regex, dataset)[0]
 
-        functions.append((
-            name + val,  # Add ds_type
-            extract_all(regex, dataset)[1]
-            if ext_all else extract(regex, dataset)[1]
-        ))
+                functions.append((
+                    group + name + val,
+                    extract_all(regex, dataset)[1]
+                    if ext_all else extract(regex, dataset)[1]
+                ))
+    else:
+        for val in parameter_domain:
+            regex = regexes[0] + val + regexes[1]
+
+            # 1st iteration
+            if var_domain == None:
+                var_domain = extract_all(regex, dataset)[0]\
+                    if ext_all else extract(regex, dataset)[0]
+
+            functions.append((
+                name + val,
+                extract_all(regex, dataset)[1]
+                if ext_all else extract(regex, dataset)[1]
+            ))
 
     create_plot(title, xlabel, ylabel, var_domain, *functions)
 
 
-datasets = {}
-with open(args['input'], 'r') as file:
-    curr_dataset = {}
-    curr_name = 0
+def extract_datasets(input_file: str):
+    """extract datasets from the given input files"""
+    datasets = {}
+    with open(input_file, 'r') as file:
+        curr_dataset = {}
+        curr_name = 0
 
-    for line in file:
-        data = line.strip().split(' ')
+        for line in file:
+            data = line.strip().split(' ')
 
-        if len(data) == 2:
-            curr_dataset[data[0]] = float(data[1])
+            if len(data) == 2:
+                curr_dataset[data[0]] = float(data[1])
 
-        elif len(data) == 1:
-            if not curr_name == 0:
-                datasets[curr_name] = curr_dataset
+            elif len(data) == 1:
+                if not curr_name == 0:
+                    datasets[curr_name] = curr_dataset
 
-            curr_name = int(data[0])
-            curr_dataset = {}
+                curr_name = int(data[0])
+                curr_dataset = {}
 
-        else:
-            raise Exception('Tryng to parse unexpected data.')
+            else:
+                raise Exception('Tryng to parse unexpected data.')
 
-    # Adding dataset that was processed when file ended
-    datasets[curr_name] = curr_dataset
+        # Adding dataset that was processed when file ended
+        datasets[curr_name] = curr_dataset
+    return datasets
 
-# print_datasets(datasets)
-first_key = next(iter(datasets))
 
-# ['10', '15', '20', '25']
-orders = getParameterDomain('o', datasets[first_key])
-# ['0', '0.2', '0.3', '0.4']
-alphas = getParameterDomain('a', datasets[first_key])
+if __name__ == "__main__":
+    args = parse_args()
+    sns.set()
+    SAVING_DIR = args.output
 
-type_tests = ['T', 'I', 'D', 'RS']
+    datasets = extract_datasets(args.input)
 
-for test in type_tests:
-    for name, dataset in datasets.items():
-        create_plot_parameter("%s %s var alpha" % (str(name), test),
-                              "alpha",
-                              "time (ms)",
-                              ("%s_o" % test,
-                               r"_a(.[\d.]*)#test': (.[\d.]*)"),
-                              '%s o' % test,
-                              orders,
-                              dataset)
-        create_plot_parameter("%s %s var order" % (str(name), test),
-                              "order",
-                              "time (ms)",
-                              (test + r"_o(.\d*)_a",
-                               r"#test': (.[\d.]*)"),
-                              '%s a' % test,
-                              alphas,
-                              dataset)
+    first_key = next(iter(datasets))
+    orders = getParameterDomain('o', datasets[first_key])
+    alphas = getParameterDomain('a', datasets[first_key])
 
-    for order in orders:
-        create_plot_parameter("%s var dataset o%s" % (test, order),
-                              "dataset size",
-                              "time (ms)",
-                              ("%s_o%s_a" % (test, order),
-                               r"#test': (.[\d.]*)"),
-                              '%s o%s a' % (test, order),
-                              alphas,
-                              datasets,
-                              True)
+    for test in args.test_types:
+        if args.at:
+            for name, dataset in datasets.items():
+                create_plot_parameter("%s %s var alpha" % (str(name), test),
+                                      "alpha",
+                                      "time (ms)",
+                                      ("%s_o" % test,
+                                       r"_a(.[\d.]*)#test': (.[\d.]*)"),
+                                      '%s o' % test,
+                                      orders,
+                                      dataset,
+                                      args.test_groups)
 
-    for alpha in alphas:
-        create_plot_parameter("%s var dataset a%s" % (test, alpha),
-                              "dataset size",
-                              "time (ms)",
-                              ("%s_o" % test, "_a%s" % alpha +
-                               r"#test': (.[\d.]*)"),
-                              '%s a%so' % (test, alpha),
-                              orders,
-                              datasets,
-                              True)
+        if args.ot:
+            for name, dataset in datasets.items():
+                create_plot_parameter("%s %s var order" % (str(name), test),
+                                      "order",
+                                      "time (ms)",
+                                      (test + r"_o(.\d*)_a",
+                                       r"#test': (.[\d.]*)"),
+                                      '%s a' % test,
+                                      alphas,
+                                      dataset,
+                                      args.test_groups)
+
+        if args.bat:
+            for alpha in alphas:
+                create_plot_parameter("%s var dataset a%s" % (test, alpha),
+                                      "dataset size",
+                                      "time (ms)",
+                                      ("%s_o" % test, "_a%s" % alpha +
+                                       r"#test': (.[\d.]*)"),
+                                      '%s a%so' % (test, alpha),
+                                      orders,
+                                      datasets,
+                                      args.test_groups,
+                                      True)
+
+        if args.bot:
+            for order in orders:
+                create_plot_parameter("%s var dataset o%s" % (test, order),
+                                      "dataset size",
+                                      "time (ms)",
+                                      ("%s_o%s_a" % (test, order),
+                                       r"#test': (.[\d.]*)"),
+                                      '%s o%s a' % (test, order),
+                                      alphas,
+                                      datasets,
+                                      args.test_groups,
+                                      True)
+
+# Example usage:
+# python plotter.py -i ../reunion-results/bi-both.csv -o ../bi-plots -tt I T D RD DH -tg 'I2B_' 'IB_' --no-at --no-ot
