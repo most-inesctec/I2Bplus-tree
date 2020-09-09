@@ -9,6 +9,7 @@ import os
 '''Script to plot the benchmarks data'''
 
 SAVING_DIR = ''
+args = None
 
 
 def parse_args():
@@ -116,40 +117,61 @@ def create_plot(title: str, xlabel: str, ylabel: str, domain: list, *data):
 
     plt.clf()
 
-    # # Hardcoded to print ratios
-    # col_name = df.columns[1]
-    # if col_name[0:5] == "I2B_T" or col_name[0:6] == "I2B_DH":
-    #     new_title = "Ratio " + title
-    #     sns.set_palette(["#0D4F91", "#187F0D"])
+    # Hardcoded to print ratios
+    col_name = df.columns[1]
+    if col_name[0:5] == "I2B_T" or col_name[0:6] == "I2B_DH":
+        new_title = "Ratio " + title
+        sns.set_palette(["#0D4F91", "#187F0D", "#421474"])
+        is_o_plot = "dataset o" in title
 
-    #     n = "Ratio " + col_name[4:]
-    #     df[n] = df.iloc[:, 1] / df.iloc[:, 2]
-    #     plt.plot(df['x'], df[n], marker='.',
-    #              linewidth=1, alpha=1, label=n)
-    #     df = df.drop(n, axis=1)
+        # Reference line
+        plt.axhline(y=1, linewidth=1, color='red', alpha=1)
 
-    #     n = "Ratio " + df.columns[3][4:]
-    #     df[n] = df.iloc[:, 3] / df.iloc[:, 4]
-    #     plt.plot(df['x'], df[n], marker='.',
-    #              linewidth=1, alpha=1, label=n)
-    #     df = df.drop([n], axis=1)
+        # First ratio
+        n1 = "Ratio " + col_name[4:]
+        df[n1] = df.iloc[:, 1] / df.iloc[:, 2]
+        plt.plot(df['x'], df[n1], marker='.',
+                 linewidth=1, alpha=0.3 if is_o_plot else 1, label=n1)
 
-    #     plt.axhline(y=1, linewidth=1, color='r')
-    #     plt.legend(loc=4, ncol=2)
-    #     plt.title(new_title, loc='left',
-    #               fontsize=12, fontweight=0, color='black')
-    #     plt.xlabel(xlabel)
-    #     plt.ylabel(ylabel)
-    #     # plt.gca().set_ylim(bottom=0)
+        # Second ratio
+        n2 = "Ratio " + df.columns[3][4:]
+        df[n2] = df.iloc[:, 3] / df.iloc[:, 4]
+        plt.plot(df['x'], df[n2], marker='.',
+                 linewidth=1, alpha=0.3 if is_o_plot else 1, label=n2)
 
-    #     if not os.path.exists(SAVING_DIR):
-    #         os.makedirs(SAVING_DIR)
+        # Third ratio
+        if not is_o_plot:
+            n3 = "Ratio " + df.columns[5][4:]
+            df[n3] = df.iloc[:, 5] / df.iloc[:, 6]
+            plt.plot(df['x'], df[n3], marker='.',
+                     linewidth=1, alpha=1, label=n3)
 
-    #     plt.savefig(SAVING_DIR + '/' + new_title + '.png')
-    #     plt.clf()
+        # Trend line
+        if is_o_plot:
+            trend_fn = np.poly1d(np.polyfit(df[n1].values, df[n2].values, 1))
+            plt.plot(df['x'], [trend_fn((val1 + val2) / 2.0) for (val1, val2)
+                               in zip(df[n1].values, df[n2].values)], marker='', linewidth=1,
+                     alpha=1, color='black', label="Ratios trend line")
+        df = df.drop(n1, axis=1)
+        df = df.drop(n2, axis=1)
+        if not is_o_plot:
+            df = df.drop(n3, axis=1)
+
+        plt.legend(loc=4, ncol=2)
+        plt.title(new_title, loc='left',
+                  fontsize=12, fontweight=0, color='black')
+        plt.xlabel(xlabel)
+        plt.ylabel(ylabel)
+
+        if not os.path.exists(SAVING_DIR):
+            os.makedirs(SAVING_DIR)
+
+        plt.savefig(SAVING_DIR + '/' + new_title + '.png')
+        plt.clf()
 
     # sns.set_palette("RdYlBu", len(data))
-    sns.set_palette(["#0D4F91", "#8EAFC9", "#187F0D", "#91C763"])
+    sns.set_palette(["#0D4F91", "#8EAFC9", "#187F0D",
+                     "#91C763", "#421474", "#AA8CB8"])
 
     # multiple line plot
     for column in df.drop('x', axis=1):
