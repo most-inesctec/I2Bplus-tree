@@ -48,6 +48,9 @@ def parse_args():
     ap.add_argument('--no-bot', dest='bot', action='store_false',
                     help='Flag indicating that the big-O order tests do not run')
     ap.set_defaults(bot=True)
+    # Moving average period for ratios
+    ap.add_argument('-ma', '--moving_avg', type=int,
+                    default=3, help='The moving average period for plotting the ratios trend.')
     return ap.parse_args()
 
 
@@ -105,6 +108,20 @@ def extract_all(regex: str, data: dict) -> (list, list):
     return (domain, values)
 
 
+def get_lists_moving_avg(lists: list, period: int) -> list:
+    """Get the moving average from the given lists.
+    Notice that all lists must have the same size."""
+    num_lists = len(lists)
+    avgs = [sum(vals)/num_lists for vals in zip(*lists)]
+
+    if period > len(avgs):
+        raise Exception(
+            "Period can not be bigger than moving average list size.")
+
+    return [sum(avgs[i-period:i]) / period
+            for i in range(period, len(avgs) + 1)]
+
+
 def create_plot(title: str, xlabel: str, ylabel: str, domain: list, *data):
     """Creates and Saves a 'Spagetti plot' with the given title, horizontal
     label, vertical label, domain and functions (name and values) presented
@@ -148,9 +165,9 @@ def create_plot(title: str, xlabel: str, ylabel: str, domain: list, *data):
 
         # Trend line
         if is_o_plot:
-            trend_fn = np.poly1d(np.polyfit(df[n1].values, df[n2].values, 1))
-            plt.plot(df['x'], [trend_fn((val1 + val2) / 2.0) for (val1, val2)
-                               in zip(df[n1].values, df[n2].values)], marker='', linewidth=1,
+            trend = get_lists_moving_avg(
+                [df[n1].values, df[n2].values], args.moving_avg)
+            plt.plot(df['x'][args.moving_avg-1:], trend, marker='', linewidth=1,
                      alpha=1, color='black', label="Ratios trend line")
         df = df.drop(n1, axis=1)
         df = df.drop(n2, axis=1)
