@@ -26,7 +26,7 @@
   "scripts": {
     "test": "mocha -r ts-node/register tests/*.test.ts",
     "test-coverage": "nyc -r lcov -e .ts -x \"*.test.ts\" mocha -r ts-node/register tests/*.test.ts && nyc report --reporter=text-lcov | coveralls",
-    "benchmark": "node -r ts-node/register benchmarks/src/Main.benchmark.ts"
+    "benchmark": "node --max-old-space-size=4096 --stack-size=2000 -r ts-node/register benchmarks/src/Main.benchmark.ts"
   },
   "repository": {
     "type": "git",

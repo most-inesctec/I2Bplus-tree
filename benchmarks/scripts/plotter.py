@@ -168,7 +168,7 @@ def create_plot(title: str, xlabel: str, ylabel: str, domain: list, *data):
             trend = get_lists_moving_avg(
                 [df[n1].values, df[n2].values], args.moving_avg)
             plt.plot(df['x'][args.moving_avg-1:], trend, marker='', linewidth=1,
-                     alpha=1, color='black', label="Ratios trend line")
+                     alpha=1, color='black', label="Ratios moving average line")
         df = df.drop(n1, axis=1)
         df = df.drop(n2, axis=1)
         if not is_o_plot:
@@ -178,7 +178,7 @@ def create_plot(title: str, xlabel: str, ylabel: str, domain: list, *data):
         plt.title(new_title, loc='left',
                   fontsize=12, fontweight=0, color='black')
         plt.xlabel(xlabel)
-        plt.ylabel(ylabel)
+        plt.ylabel('I2B performance / IB performance')
 
         if not os.path.exists(SAVING_DIR):
             os.makedirs(SAVING_DIR)
