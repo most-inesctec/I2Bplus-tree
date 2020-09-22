@@ -5,15 +5,15 @@ const DATASETS_DIR: string = 'benchmarks/si-datasets';
 /**
  * Output directory for the benchmarking logs
  */
-const OUTPUT_DIR: string = 'benchmarks/results';
+const OUTPUT_DIR: string = 'benchmarks/kruonis-results-v2';
 /**
  * Output file, in the afore mentioned output directory, for the logs
  */
-const OUTPUT_FILE: string = 'si-i2b.csv'
+const OUTPUT_FILE: string = 'si-i2b.csv';
 /**
  * Possible tree orders for the benchmarking tests
  */
-const ORDERS: Array<number> = [10, 20] //[5, 10, 15, 20, 25, 30, 35, 40, 50, 60, 70, 80, 90];
+const ORDERS: Array<number> = [4, 10, 20] //[5, 10, 15, 20, 25, 30, 35, 40, 50, 60, 70, 80, 90];
 /**
  * Possible alphas for time splitting in the trees used in benchmarking
  */
