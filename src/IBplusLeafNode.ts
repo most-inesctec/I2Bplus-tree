@@ -77,9 +77,12 @@ export class IBplusLeafNode<T extends FlatInterval> extends IBplusNode<T> {
     containedRangeSearch(int: FlatInterval) {
         const intervals: Set<T> = new Set();
 
-        for (const child of this.children)
-            if (int.contains(child))
-                intervals.add(child.getOriginalInterval());
+        for (const child of this.children) {
+            const originInt: T = child.getOriginalInterval();
+
+            if (int.contains(originInt))
+                intervals.add(originInt);
+        }
 
         return intervals;
     }
@@ -136,7 +139,7 @@ export class IBplusLeafNode<T extends FlatInterval> extends IBplusNode<T> {
 
     findInterval(int: Interval<T>): [IBplusLeafNode<T>, number] | null {
         for (let i: number = 0; i < this.keys.length; ++i)
-            if (this.children[i].equals(int))
+            if (this.children[i].getOriginalInterval().equals(int))
                 return [this, i];
         return null;
     }
@@ -145,7 +148,7 @@ export class IBplusLeafNode<T extends FlatInterval> extends IBplusNode<T> {
         let res: Array<[IBplusLeafNode<T>, Interval<T>]> = [];
 
         for (let child of this.children)
-            if (int.contains(child))
+            if (int.contains(child.getOriginalInterval()))
                 res.push([this, child]);
 
         return res;
