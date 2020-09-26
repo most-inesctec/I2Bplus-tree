@@ -49,7 +49,7 @@ export class IBplusTree<T extends FlatInterval> {
      * @param int The Interval to be removed
      */
     delete(int: T): void {
-        this.root.delete(int);
+        this.root.delete(int, this.alpha);
 
         if (this.root.isChildNewRoot())
             // It is forcibly of type IBPlusInternalNode

@@ -27,8 +27,8 @@ describe('Removals', () => {
         expect(child0.getMinKey()).to.equal(2);
         expect(child0.getChildren().length).to.equal(4);
 
-        root.delete(new FlatInterval(2, 3));
-        root.delete(new FlatInterval(4, 22));
+        root.delete(new FlatInterval(2, 3), null);
+        root.delete(new FlatInterval(4, 22), null);
 
         expect(child0.getMax()).to.equal(13);
         expect(child0.getMinKey()).to.equal(3);
@@ -38,19 +38,19 @@ describe('Removals', () => {
     it('Delete with Borrowing', () => {
         let root: IBplusInternalNode<FlatInterval> =
             new IBplusInternalNode<FlatInterval>(4, null);
-        root.insert(new FlatInterval(4, 22), 0);
-        root.insert(new FlatInterval(6, 11), 0);
-        root.insert(new FlatInterval(10, 13), 0);
-        root.insert(new FlatInterval(14, 17), 0);
-        root.insert(new FlatInterval(20, 32), 0);
-        root.insert(new FlatInterval(26, 41), 0);
-        root.insert(new FlatInterval(2, 3), 0);
-        root.insert(new FlatInterval(3, 13), 0);
-        root.insert(new FlatInterval(26, 31), 0);
-        root.insert(new FlatInterval(15, 30), 0);
-        root.insert(new FlatInterval(22, 24), 0);
-        root.insert(new FlatInterval(23, 24), 0);
-        root.insert(new FlatInterval(19, 41), 0);
+        root.insert(new FlatInterval(4, 22), 0.1);
+        root.insert(new FlatInterval(6, 11), 0.1);
+        root.insert(new FlatInterval(10, 13), 0.1);
+        root.insert(new FlatInterval(14, 17), 0.1);
+        root.insert(new FlatInterval(20, 32), 0.1);
+        root.insert(new FlatInterval(26, 41), 0.1);
+        root.insert(new FlatInterval(2, 3), 0.1);
+        root.insert(new FlatInterval(3, 13), 0.1);
+        root.insert(new FlatInterval(26, 31), 0.1);
+        root.insert(new FlatInterval(15, 30), 0.1);
+        root.insert(new FlatInterval(22, 24), 0.1);
+        root.insert(new FlatInterval(23, 24), 0.1);
+        root.insert(new FlatInterval(19, 41), 0.1);
 
         let [child0, child1, child2, child3] = root.getChildren();
 
@@ -61,7 +61,7 @@ describe('Removals', () => {
         expect(child2.getChildren().length).to.equal(3);
         let borrowed = child2.getChildren()[2];
 
-        root.delete(new FlatInterval(26, 41));
+        root.delete(new FlatInterval(26, 41), 0.1);
 
         expect(child3.getMax()).to.equal(31);
         expect(child3.getMinKey()).to.equal(23);
@@ -76,9 +76,9 @@ describe('Removals', () => {
         expect(child1.getChildren().length).to.equal(4);
         borrowed = child1.getChildren()[0];
 
-        root.delete(new FlatInterval(2, 3));
-        root.delete(new FlatInterval(4, 22));
-        root.delete(new FlatInterval(6, 11));
+        root.delete(new FlatInterval(2, 3), 0.1);
+        root.delete(new FlatInterval(4, 22), 0.1);
+        root.delete(new FlatInterval(6, 11), 0.1);
 
         expect(child0.getMax()).to.equal(13);
         expect(child0.getMinKey()).to.equal(3);
@@ -117,7 +117,7 @@ describe('Removals', () => {
         expect(child2.getChildren().length).to.equal(3);
 
         // Had to borrow one
-        root.delete(new FlatInterval(26, 41));
+        root.delete(new FlatInterval(26, 41), null);
 
         expect(child3.getMax()).to.equal(31);
         expect(child3.getMinKey()).to.equal(23);
@@ -127,7 +127,7 @@ describe('Removals', () => {
         expect(child2.getChildren().length).to.equal(2);
 
         // Merge ocurring
-        root.delete(new FlatInterval(23, 24));
+        root.delete(new FlatInterval(23, 24), null);
 
         expect(root.getChildren().length).to.equal(3);
         expect(child2.getMax()).to.equal(32);

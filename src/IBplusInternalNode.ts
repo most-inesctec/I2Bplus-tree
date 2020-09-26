@@ -193,6 +193,16 @@ export class IBplusInternalNode<T extends FlatInterval> extends IBplusNode<T> {
         return res;
     }
 
+    findIntervalWithCompounds(int: Interval<T>): Array<[IBplusLeafNode<T>, Interval<T>, number]> {
+        let res: Array<[IBplusLeafNode<T>, Interval<T>, number]> = [];
+
+        for (let i = 0; i < this.keys.length; ++i)
+            if (Interval.intersectsWithValues([int.getLowerBound(), int.getUpperBound()], [this.keys[i], this.maximums[i]]))
+                res.push(...this.children[i].findIntervalWithCompounds(int));
+
+        return res;
+    }
+
     findIntervalsInRange(int: Interval<T> | FlatInterval): Array<[IBplusLeafNode<T>, Interval<T>]> {
         let res: Array<[IBplusLeafNode<T>, Interval<T>]> = [];
 
@@ -205,17 +215,69 @@ export class IBplusInternalNode<T extends FlatInterval> extends IBplusNode<T> {
     }
 
     /**
+      * Function to be called on successive deletions,
+      * where a previous removal can make an interval change leaf or index
+      * 
+      * @param leaf the initial leaf
+      * @param int the initial index
+      * @return pair of leaf and the index of the interval on it
+      */
+    private checkIntervalOnLeaf(leaf: IBplusLeafNode<T>, int: Interval<T>): [IBplusLeafNode<T>, number] {
+        let sibling: IBplusLeafNode<T> = leaf.getSubstituteSibling();
+        while (sibling) {
+            leaf = sibling;
+            sibling = sibling.getSubstituteSibling();
+        }
+
+        let childIdx: number = leaf.getChildren().indexOf(int);
+        if (childIdx < 0)
+            // Previous removals triggered borrows that moved the child
+            if (leaf.getLeftSibling() && int.getLowerBound() <= leaf.getMinKey())
+                // Sent to left sibling leaf
+                leaf = <IBplusLeafNode<T>>leaf.getLeftSibling();
+            else if (leaf.getRightSibling() && int.getLowerBound() > leaf.getMinKey())
+                // Sent to right sibling leaf
+                leaf = <IBplusLeafNode<T>>leaf.getRightSibling();
+            else
+                throw Error('Unable to find child in range remove.');
+
+        return [leaf, leaf.getChildren().indexOf(int)];
+    }
+
+    /**
      * Deletes a given interval if it exists in one of the tree's (that have this node as root) leafs.
      * The tree self-balances on deletion.
      * 
      * @param int The interval to be deleted
      */
-    delete(int: Interval<T>): void {
-        let found: [IBplusLeafNode<T>, number] = this.findInterval(int);
+    delete(int: Interval<T>, alpha: number): void {
+        if (!alpha || alpha == 0) {
+            let found: [IBplusLeafNode<T>, number] = this.findInterval(int);
 
-        if (found != null)
-            found[0].removeChild(found[1]);
+            if (found != null)
+                found[0].removeChild(found[1]);
+        } else {
+            let foundInts: Array<[IBplusLeafNode<T>, Interval<T>, number]> = this.findIntervalWithCompounds(int);
+
+            // Remove the first found
+            let [leaf, foundInt, idx] = foundInts[0];
+            leaf.removeChild(idx);
+
+            // If the eliminated interval is a compound, also eliminate the remaining Compounds referring the same interval\
+            if (foundInt != foundInt.getOriginalInterval()) {
+                const originInt = foundInt.getOriginalInterval();
+
+                for (let i = 1; i < foundInts.length; ++i) {
+                    [leaf, int, idx] = foundInts[i];
+                    [leaf, idx] = this.checkIntervalOnLeaf(leaf, int);
+
+                    if (leaf.getChildren()[idx].getOriginalInterval() == originInt)
+                        leaf.removeChild(idx);
+                }
+            }
+        }
     }
+
 
     /**
      * Deletes all the interval contained in a given range.
@@ -230,28 +292,10 @@ export class IBplusInternalNode<T extends FlatInterval> extends IBplusNode<T> {
                 new FlatInterval(lowerBound, upperBound)
             );
 
-
         for (let [leaf, int] of foundInts) {
-            // Recursively get the leaf currently substituting this leaf
-            let sibling: IBplusLeafNode<T> = leaf.getSubstituteSibling();
-            while (sibling) {
-                leaf = sibling;
-                sibling = sibling.getSubstituteSibling();
-            }
-
-            let childIdx: number = leaf.getChildren().indexOf(int);
-            if (childIdx < 0)
-                // Previous removals triggered borrows that moved the child
-                if (leaf.getLeftSibling() && int.getLowerBound() <= leaf.getMinKey())
-                    // Sent to left sibling leaf
-                    leaf = <IBplusLeafNode<T>>leaf.getLeftSibling();
-                else if (leaf.getRightSibling() && int.getLowerBound() > leaf.getMinKey())
-                    // Sent to right sibling leaf
-                    leaf = <IBplusLeafNode<T>>leaf.getRightSibling();
-                else
-                    throw Error('Unable to find child in range remove.');
-
-            leaf.removeChild(leaf.getChildren().indexOf(int));
+            let childIdx;
+            [leaf, childIdx] = this.checkIntervalOnLeaf(leaf, int);
+            leaf.removeChild(childIdx);
         }
     }
 
