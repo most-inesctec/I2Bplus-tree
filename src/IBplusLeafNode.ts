@@ -144,6 +144,17 @@ export class IBplusLeafNode<T extends FlatInterval> extends IBplusNode<T> {
         return null;
     }
 
+    findIntervalWithCompounds(int: Interval<T>): Array<[IBplusLeafNode<T>, Interval<T>, number]> {
+        let res: Array<[IBplusLeafNode<T>, Interval<T>, number]> = [];
+
+        for (let i = 0; i < this.children.length; ++i)
+            if (int.equals(this.children[i].getOriginalInterval())) {
+                res.push([this, this.children[i], i]);
+            }
+
+        return res;
+    }
+
     findIntervalsInRange(int: Interval<T> | FlatInterval): Array<[IBplusLeafNode<T>, Interval<T>]> {
         let res: Array<[IBplusLeafNode<T>, Interval<T>]> = [];
 
