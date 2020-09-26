@@ -63,21 +63,32 @@ describe('Bulk testing', () => {
     });
 
     it('Bulk Range Removal with TimeSplits', () => {
-        it('Bulk Range Removal', () => {
-            const tree: IBplusTree<FlatInterval> = new IBplusTree<FlatInterval>(10, 0.2);
-            for (const entry of dataset)
-                tree.insert(entry);
+        const tree: IBplusTree<FlatInterval> = new IBplusTree<FlatInterval>(10, 0.2);
+        for (const entry of dataset)
+            tree.insert(entry);
 
-            const deletedIntervals = tree.containedRangeSearch(50, 150);
-            tree.rangeDelete(50, 150);
-            expect(tree.containedRangeSearch(50, 150).size).to.equal(0);
+        // Interval [181, 188] was divided into [181, 184] and [185, 188]
+        expect(tree.search(181, 188).size).to.be.equal(4);
+        // Making sure the compound interval has to be removed
+        tree.delete(new FlatInterval(181, 188));
+        expect(tree.search(181, 188).size).to.be.equal(3);
+        tree.delete(new FlatInterval(181, 188));
+        tree.delete(new FlatInterval(181, 188));
+        tree.delete(new FlatInterval(181, 188));
+        expect(tree.search(181, 188).size).to.be.equal(0);
+        const iterator = tree.containedRangeSearch(181, 188).values();
+        for (let next = iterator.next(); next.done !== true; next = iterator.next())
+            expect(next.value.equals(new FlatInterval(181, 188))).to.be.false;
 
-            for (let int of Array.from(deletedIntervals))
-                tree.insert(int);
-            expect(tree.containedRangeSearch(50, 150).size).to.equal(deletedIntervals.size);
+        const deletedIntervals = tree.containedRangeSearch(50, 150);
+        tree.rangeDelete(50, 150);
+        expect(tree.containedRangeSearch(50, 150).size).to.equal(0);
 
-            tree.rangeDelete(-1, 300);
-            expect(tree.allRangeSearch(-1, 300).size).to.equal(0);
-        });
+        for (let int of Array.from(deletedIntervals))
+            tree.insert(int);
+        expect(tree.containedRangeSearch(50, 150).size).to.equal(deletedIntervals.size);
+
+        tree.rangeDelete(-1, 300);
+        expect(tree.allRangeSearch(-1, 300).size).to.equal(0);
     });
 });
