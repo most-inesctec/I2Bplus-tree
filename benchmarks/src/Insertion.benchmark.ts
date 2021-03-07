@@ -1,10 +1,7 @@
 import { IBplusTree, Interval, FlatInterval } from '../../src';
 import { addBenchmarkLogsAndRun } from "./Helpers";
 import { getOrders, getAlphas } from './Settings';
-import { Suite } from "benchmark";
-
-
-let iterator: number = 0;
+import { Benchmark, Test } from 'kruonis';
 
 const createTree = (intervals: Array<Interval<FlatInterval>>, order: number, alpha: number):
     [IBplusTree<FlatInterval>, Array<Interval<FlatInterval>>] => {
@@ -26,18 +23,23 @@ const insertionTest = (dataset: Array<Interval<FlatInterval>>, alpha: number) =>
     let tree: IBplusTree<FlatInterval>;
     let insInts: Array<Interval<FlatInterval>>;
 
-    let suite = (new Suite).on('start cycle', function (event) {
-        [tree, insInts] = createTree(dataset, getOrders()[iterator], alpha);
-        iterator += 1;
-    });
+    let benchmark = new Benchmark();
 
-    for (const order of getOrders())
-        suite = suite.add(`I_o${order}_a${alpha}#test`, () => {
-            for (let int of insInts)
-                tree.insert(int);
-        });
+    for (const order of getOrders()) {
+        benchmark.add(
+            new Test(`I_o${order}_a${alpha}#test`, () => {
+                for (let int of insInts)
+                    tree.insert(int);
+            }).on('onBegin', () => {
+                [tree, insInts] = createTree(dataset, order, alpha);
+            }).on('onCycleEnd', () => {
+                for (let int of insInts)
+                    tree.delete(int);
+            })
+        );
+    }
 
-    addBenchmarkLogsAndRun(suite);
+    addBenchmarkLogsAndRun(benchmark);
 };
 
 export const run = (dataset: Array<Interval<FlatInterval>>) => {

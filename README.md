@@ -20,6 +20,53 @@ For an in-depth analysis of both the parameter tuning (such as the tree's order 
 
 To suit the _I2BplusTree_ to your needs, implement a class that __extends the [FlatInterval](https://github.com/EdgarACarneiro/IBplusTree/blob/master/src/FlatInterval.ts)__ class, defining the information that will be stored on leaves there. One might also want to override the `equals` method, thus allowing the incorporation of the extra information stored in the Intervals in comparisons.
 
+Example:
+```TypeScript
+import { IBplusTree, FlatInterval } from 'I2BplusTree';
+
+// Create a class that inherits from the FlatInterval
+class MyInterval extends FlatInterval {
+
+    // This is just an example property
+    // Like this there could be many more
+    private myProperty: any;
+
+    constructor(val1: number, val2: number, myPropertyValue: any) {
+        super(val1, val2);
+        this.myProperty = myPropertyValue;
+    }
+
+    // This is just an example method
+    public exampleMethod(): void {
+        // Do stuff
+    }
+
+    // Overriding equals method to take into account the new property
+    equals(int: MyInterval): boolean {
+        return this.upperBound == int.getUpperBound() &&
+            this.lowerBound == int.getLowerBound() &&
+            this.myProperty == int.getProperty();
+    }
+}
+
+// Now we create our I2BplusTree object and insert a `MyInterval` object
+const threshold = 30;
+const alpha = 0.2;
+const tree: IBplusTree<MyInterval> = new IBplusTree<MyInterval>(threshold, alpha);
+// Introduce an object
+tree.insert(new MyInterval(0, 2, "example-property"));
+
+/**
+And do many other operations such as:
+- Delete an interval from the tree
+- Delete all intervals contained in a range
+- Verify if a interval exists in the tree
+- Search all intervals with equal bounds to the ones provided
+- Find the first interval that intersects the given bounds
+- Find all intervals intersecting the given range
+- Find all intervals contained in the given range
+*/
+```
 
 # Acknowledgements
 

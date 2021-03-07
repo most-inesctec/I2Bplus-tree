@@ -84,7 +84,6 @@ export class IBplusLeafNode<T extends FlatInterval> extends IBplusNode<T> {
                 intervals.add(originInt);
         }
 
-
         return intervals;
     }
 

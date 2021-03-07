@@ -1,7 +1,7 @@
 import { IBplusTree, Interval, FlatInterval } from '../../src';
 import { addBenchmarkLogsAndRun } from "./Helpers";
 import { getOrders, getAlphas } from './Settings';
-import { Suite } from "benchmark";
+import { Benchmark, Test } from 'kruonis';
 
 
 let tree: IBplusTree<FlatInterval>;
@@ -14,14 +14,14 @@ const insertAllInts = (intervals: Array<Interval<FlatInterval>>, order: number, 
 };
 
 const treeInsertionTest = (dataset: Array<Interval<FlatInterval>>, alpha: number) => {
-    let suite = new Suite;
+    let benchmark = new Benchmark();
 
     for (let order of getOrders())
-        suite = suite.add(`T_o${order}_a${alpha}#test`, () => {
+        benchmark.add(new Test(`T_o${order}_a${alpha}#test`, () => {
             insertAllInts(dataset, order, alpha);
-        })
+        }));
 
-    addBenchmarkLogsAndRun(suite);
+    addBenchmarkLogsAndRun(benchmark);
 };
 
 export const run = (dataset: Array<Interval<FlatInterval>>) => {

@@ -1,10 +1,8 @@
 import { IBplusTree, Interval, FlatInterval } from '../../src';
 import { addBenchmarkLogsAndRun } from "./Helpers";
 import { getOrders, getAlphas } from './Settings';
-import { Suite } from "benchmark";
+import { Benchmark, Test } from "kruonis";
 
-
-let iterator: number = 0;
 let tree: IBplusTree<FlatInterval>;
 let searchInts: Array<Interval<FlatInterval>>;
 
@@ -22,58 +20,52 @@ const createTree = (intervals: Array<Interval<FlatInterval>>, order: number, alp
     return [newTree, newSearchInts];
 };
 
-/**
- * Create the test suite for a generic test
- * 
- * @param dataset The dataset used in the suite
- * @returns the created suite
- */
-const createSuite = (dataset: Array<Interval<FlatInterval>>, alpha: number): Suite => {
-    return (new Suite).on('start cycle', function (event) {
-        if (getOrders()[iterator]) {
-            [tree, searchInts] = createTree(dataset, getOrders()[iterator], alpha);
-            iterator += 1;
-        }
-    });
-}
-
 const existTest = (dataset: Array<Interval<FlatInterval>>, alpha: number) => {
-    iterator = 0;
-    let suite = createSuite(dataset, alpha);
+    const benchmark = new Benchmark();
 
     for (const order of getOrders())
-        suite = suite.add(`E_o${order}_a${alpha}#test`, () => {
-            for (let int of searchInts)
-                tree.exists(int);
-        });
+        benchmark.add(
+            new Test(`E_o${order}_a${alpha}#test`, () => {
+                for (let int of searchInts)
+                    tree.exists(int);
+            }).on('onBegin', () => {
+                [tree, searchInts] = createTree(dataset, order, alpha);
+            })
+        );
 
-    addBenchmarkLogsAndRun(suite);
+    addBenchmarkLogsAndRun(benchmark);
 }
 
 const rangeSearchTest = (dataset: Array<Interval<FlatInterval>>, alpha: number) => {
-    iterator = 0;
-    let suite = createSuite(dataset, alpha);
+    const benchmark = new Benchmark();
 
     for (const order of getOrders())
-        suite = suite.add(`RS_o${order}_a${alpha}#test`, () => {
-            for (let int of searchInts)
-                tree.allRangeSearch(int.getLowerBound(), int.getUpperBound());
-        });
+        benchmark.add(
+            new Test(`RS_o${order}_a${alpha}#test`, () => {
+                for (let int of searchInts)
+                    tree.allRangeSearch(int.getLowerBound(), int.getUpperBound());
+            }).on('onBegin', () => {
+                [tree, searchInts] = createTree(dataset, order, alpha);
+            })
+        );
 
-    addBenchmarkLogsAndRun(suite);
+    addBenchmarkLogsAndRun(benchmark);
 }
 
 const containedRangeSearchTest = (dataset: Array<Interval<FlatInterval>>, alpha: number) => {
-    iterator = 0;
-    let suite = createSuite(dataset, alpha);
+    const benchmark = new Benchmark();
 
     for (const order of getOrders())
-        suite = suite.add(`CRS_o${order}_a${alpha}#test`, () => {
-            for (let int of searchInts)
-                tree.containedRangeSearch(int.getLowerBound(), int.getUpperBound());
-        });
+        benchmark.add(
+            new Test(`CRS_o${order}_a${alpha}#test`, () => {
+                for (let int of searchInts)
+                    tree.containedRangeSearch(int.getLowerBound(), int.getUpperBound());
+            }).on('onBegin', () => {
+                [tree, searchInts] = createTree(dataset, order, alpha);
+            })
+        );
 
-    addBenchmarkLogsAndRun(suite);
+    addBenchmarkLogsAndRun(benchmark);
 }
 
 export const run = (dataset: Array<Interval<FlatInterval>>) => {

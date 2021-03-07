@@ -1,29 +1,23 @@
 import { appendFileSync } from "fs";
-import { Suite } from "benchmark";
-import { getOutputPath } from './Settings'
+import { getOutputPath } from './Settings';
+import { Benchmark, Test } from 'kruonis';
 
-
-const secToMilisec: number = 1000;
-
-const prettyStats = (result: Suite) => {
-    console.log(`${String(result)}:\n` +
-        ` * Mean: ${result.stats.mean * secToMilisec}ms\n` +
-        ` * Standard Deviation: ${result.stats.deviation * secToMilisec}ms\n`);
+const prettyStats = (test: Test) => {
+    console.log(`${test.name} (${test.getStats().count} cycles):\n` +
+        ` * Mean: ${test.getStats().mean}ms\n` +
+        ` * Standard Deviation: ${test.getStats().std}ms\n`);
 }
 
-const logToFile = (result: Suite) => {
+const logToFile = (test: Test) => {
     appendFileSync(getOutputPath(),
-        `${result.name} ${result.stats.mean * secToMilisec}\n`);
+        `${test.name} ${test.getStats().mean}\n`);
 }
 
-export const addBenchmarkLogsAndRun = (benchmark: Suite) => {
+export const addBenchmarkLogsAndRun = (benchmark: Benchmark) => {
     // add listeners
-    benchmark.on('cycle', function (event) {
-        prettyStats(event.target);
-        logToFile(event.target);
-    })
-        .on('complete', function () {
-            console.log('Fastest is ' + this.filter('fastest').map('name') + '\n\n');
-        })
-        .run({ 'async': false });
+    benchmark
+        .on('onTestEnd', (benchmark: Benchmark, result: Test) => {
+            prettyStats(result);
+            logToFile(result);
+        }).run();
 }
