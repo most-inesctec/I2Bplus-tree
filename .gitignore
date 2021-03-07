@@ -8,6 +8,7 @@ output/
 plots/
 datasets/
 results/
+dist/
 
 .nyc_output/
 coverage/

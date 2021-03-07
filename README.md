@@ -22,7 +22,7 @@ To suit the _I2BplusTree_ to your needs, implement a class that __extends the [F
 
 Example:
 ```TypeScript
-import { IBplusTree, FlatInterval } from 'I2BplusTree';
+import { IBplusTree, FlatInterval } from 'i2bplustree';
 
 // Create a class that inherits from the FlatInterval
 class MyInterval extends FlatInterval {

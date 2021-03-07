@@ -1,30 +1,27 @@
 {
-  "name": "ibplustree",
+  "name": "i2bplustree",
   "version": "1.0.0",
   "description": "A package to implement the Improved Interval B+ tree, in TypeScript",
-  "main": "src/index.ts",
-  "directories": {
-    "src": "src",
-    "test": "tests"
-  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "dependencies": {
-    "performance-node": "^0.2.0"
+    "performance-node": "^0.2.0",
+    "ts-node": "^8.0.3",
+    "typedoc": "^0.16.9",
+    "typescript": "^3.4.1"
   },
   "devDependencies": {
     "@types/chai": "^4.1.7",
     "@types/mocha": "^5.2.6",
     "@types/node": "^11.13.4",
-    "benchmark": "^2.1.4",
     "chai": "^4.2.0",
     "coveralls": "^3.0.11",
     "kruonis": "^1.0.2",
     "mocha": "^6.0.2",
-    "nyc": "^13.3.0",
-    "ts-node": "^8.0.3",
-    "typedoc": "^0.16.9",
-    "typescript": "^3.4.1"
+    "nyc": "^13.3.0"
   },
   "scripts": {
+    "build": "tsc",
     "test": "mocha -r ts-node/register tests/*.test.ts",
     "test-coverage": "nyc -r lcov -e .ts -x \"*.test.ts\" mocha -r ts-node/register tests/*.test.ts && nyc report --reporter=text-lcov | coveralls",
     "benchmark": "node --max-old-space-size=4096 --stack-size=2000 -r ts-node/register benchmarks/src/Main.benchmark.ts"
@@ -34,19 +31,25 @@
     "url": "git+https://github.com/most-inesctec/I2BplusTree.git"
   },
   "keywords": [
+    "I2B+tree",
+    "I2BplusTree",
+    "I2B+",
     "temporal data",
     "tree",
     "tree structure",
     "Interval B+ tree",
+    "IB+tree",
+    "IB+",
     "intervals",
     "temporal tree",
     "B+",
     "logarithmic complexity",
     "temporal",
-    "index"
+    "index",
+    "valid time"
   ],
-  "author": "EdgarACarneiro",
-  "license": "ISC",
+  "author": "most-inesctec",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/most-inesctec/I2BplusTree/issues"
   },
