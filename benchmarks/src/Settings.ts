@@ -5,7 +5,7 @@ const DATASETS_DIR: string = 'benchmarks/si-datasets';
 /**
  * Output directory for the benchmarking logs
  */
-const OUTPUT_DIR: string = 'benchmarks/kruonis-results-v2';
+const OUTPUT_DIR: string = 'benchmarks/kruonis-results-v2-test';
 /**
  * Output file, in the afore mentioned output directory, for the logs
  */

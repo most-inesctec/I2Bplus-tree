@@ -1,7 +1,7 @@
 import { IBplusTree, Interval, FlatInterval } from '../../src';
 import { addBenchmarkLogsAndRun } from "./Helpers";
 import { getOrders, getAlphas } from './Settings';
-import { Benchmark, Test } from '../kruonis';
+import { Benchmark, Test } from 'kruonis';
 
 const createTree = (intervals: Array<Interval<FlatInterval>>, order: number, alpha: number):
     [IBplusTree<FlatInterval>, Array<Interval<FlatInterval>>] => {

@@ -1,6 +1,6 @@
 import { appendFileSync } from "fs";
 import { getOutputPath } from './Settings';
-import { Benchmark, Test } from '../kruonis';
+import { Benchmark, Test } from 'kruonis';
 
 const prettyStats = (test: Test) => {
     console.log(`${test.name} (${test.getStats().count} cycles):\n` +

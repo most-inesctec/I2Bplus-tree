@@ -1,7 +1,7 @@
 import { IBplusTree, Interval, FlatInterval } from '../../src';
 import { addBenchmarkLogsAndRun } from "./Helpers";
 import { getOrders, getAlphas } from './Settings';
-import { Benchmark, Test } from '../kruonis';
+import { Benchmark, Test } from 'kruonis';
 
 
 let tree: IBplusTree<FlatInterval>;
