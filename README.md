@@ -1,5 +1,9 @@
 # Improved Interval B+ tree implementation (_I2B+ tree_)
 
+![npm](https://img.shields.io/npm/v/i2bplustree)
+![npm](https://img.shields.io/npm/dm/i2bplustree)
+![NPM](https://img.shields.io/npm/l/i2bplustree)
+
 [![BCH compliance](https://bettercodehub.com/edge/badge/most-inesctec/I2Bplus-tree?branch=master)](https://bettercodehub.com/)
 [![Build Status](https://travis-ci.com/most-inesctec/I2Bplus-tree.svg?branch=master)](https://travis-ci.com/most-inesctec/I2Bplus-tree)
 [![Coverage Status](https://coveralls.io/repos/github/most-inesctec/I2Bplus-tree/badge.svg?branch=master)](https://coveralls.io/github/most-inesctec/I2Bplus-tree?branch=master)
