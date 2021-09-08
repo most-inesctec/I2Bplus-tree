@@ -81,3 +81,7 @@ This work is also part of [MOST](http://most.web.ua.pt).
 # Citation
 
 > E. Carneiro, A. V. d. Carvalho and M. A. Oliveira, "I2B+tree: Interval B+ tree variant towards fast indexing of time-dependent data," 2020 15th Iberian Conference on Information Systems and Technologies (CISTI), Sevilla, Spain, 2020, pp. 1-7, doi: 10.23919/CISTI49556.2020.9140897.
+
+OR
+
+> Carneiro, Edgar, Alexandre Valle de Carvalho, and Marco Amaro Oliveira. "A Comparative Study on the Performance of the IB+ Tree and the I2B+ Tree." Journal of Information Systems Engineering and Management 6.3 (2021): em0142.
